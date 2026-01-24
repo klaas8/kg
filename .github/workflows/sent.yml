@@ -11,6 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
+      - name: 验证手机号
+        run: |
+          PHONE="${{ github.event.inputs.phone }}"
+          if [[ ! "$PHONE" =~ ^[0-9]+$ ]]; then
+            echo "❌ 手机号必须为纯数字"
+            exit 1
+          fi
+          if [[ ${#PHONE} -ne 11 ]]; then
+            echo "❌ 手机号必须是11位数字，当前: ${#PHONE} 位"
+            exit 1
+          fi
+          if [[ ! "$PHONE" =~ ^1[3-9][0-9]{9}$ ]]; then
+            echo "❌ 手机号格式错误"
+            echo "格式: 1开头，第二位3-9，共11位数字"
+            exit 1
+          fi
       - name: 检出仓库
         uses: actions/checkout@v3
       - name: 创建node
@@ -33,4 +49,4 @@ jobs:
       - name: 发送验证码
         run: npm run sent
         env:
-          PHONE: ${{ secrets.PHONE }}
+          PHONE: ${{ github.event.inputs.phone }}
