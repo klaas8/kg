@@ -5,8 +5,9 @@ on:
       phone:
         description: "输入手机号"
         required: true
-        default: ""
-        type: string
+        type: number
+        max: 11
+        min: 11
 
 jobs:
   run:
