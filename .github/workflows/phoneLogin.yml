@@ -1,9 +1,11 @@
 name: phoneLogin
 on:
   workflow_dispatch:
-  # push:
-  # schedule:
-  #   - cron: 1 16 * * *
+    inputs:
+      code:
+        description: "输入验证码"
+        required: true
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -11,6 +13,8 @@ jobs:
     steps:
       - name: 检出仓库
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}
       - name: 创建node
         uses: actions/setup-node@v3
         with:
@@ -32,4 +36,4 @@ jobs:
         run: npm run phoneLogin
         env:
           PHONE: ${{ secrets.PHONE }}
-          CODE: ${{ secrets.CODE }}
+          CODE: ${{ github.event.inputs.code }}
