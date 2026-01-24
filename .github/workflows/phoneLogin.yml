@@ -21,7 +21,7 @@ jobs:
           node-version: 18
           cache: 'npm'
           cache-dependency-path: ./api/package-lock.json
-            - name: 🔧 安装GitHub CLI，并使用PAT登录
+      - name: 🔧 安装GitHub CLI，并使用PAT登录
         env:
           PAT: ${{ secrets.PAT }}
         run: |
