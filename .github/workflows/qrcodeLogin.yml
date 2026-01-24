@@ -47,5 +47,6 @@ jobs:
         run: npm run qrcodeLogin
         env:
           NUMBER: ${{ github.event.inputs.number }}
+          API: ${{ secrets.API }}
           PAT: ${{ secrets.PAT }}
           GITHUB_REPOSITORY: ${{ github.repository }}
