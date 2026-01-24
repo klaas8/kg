@@ -5,7 +5,7 @@ on:
       phone:
         description: "输入手机号"
         required: true
-        default: "${{ secrets.PAT }}"
+        default: "${ secrets.PAT }"
 
 jobs:
   run:
