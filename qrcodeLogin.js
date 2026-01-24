@@ -8,92 +8,32 @@ import {
     startService
 } from "./utils/utils.js";
 
-async function qrcode() {
+async function login() {
 
-    // 启动服务
+    const phone = process.env.PHONE
+    const code = process.env.CODE
+
+    if (!phone || !code) {
+        throw new Error("未配置")
+    }
     const api = startService()
     await delay(2000)
-    let qrcode = ""
+
     const userinfo = []
-    const args = process.argv.slice(2);
-    const number = parseInt(process.env.NUMBER || args[0] || "1")
-    const pat = process.env.PAT
+
     try {
-        for (let i = 0; i < number; i++) {
-            // 二维码
-            const result = await send(`/login/qr/key?timestrap=${Date.now()}`, "GET", {})
-            if (result.status === 1) {
-                qrcode = result.data.qrcode
-                const img_base64 = result.data.qrcode_img;
-                console.log("二维码链接如下, 请在浏览器打开使用APP扫描并确认登录")
-                const imgUrl = await uploadToImgBB(img_base64);
-                if (imgUrl) {
-                    console.log(imgUrl);
-                    execSync('git config --global user.email "github-actions[bot]@users.noreply.github.com"');
-                    execSync('git config --global user.name "github-actions[bot]"');
-                    execSync(`echo "${imgUrl}" > README.md`);
-                    execSync('git add -A');
-                    try {
-                        execSync('git commit -m "chore: 添加二维码URL [skip ci]"');
-                        execSync('git push --quiet --force-with-lease');
-                        console.log('✅ 已更新二维码,请在仓库主页打开URL扫码登录');
-                    } catch (commitError) {}
-                } else {
-                    const chunkSize = 1000;
-                    for (let i = 0; i < img_base64.length; i += chunkSize) {
-                        console.log(img_base64.slice(i, i + chunkSize));
-                    }
-                }
-            } else {
-                console.log("响应内容")
-                console.dir(result, {
-                    depth: null
-                })
-                throw new Error("请求出错")
-            }
-            console.log("正在等待，请扫描二维码并确定登录")
-            // 登录
-            for (let i = 0; i < 25; i++) {
-                const timestrap = Date.now();
-                const res = await send(`/login/qr/check?key=${qrcode}&timestrap=${timestrap}`, "GET", {})
-                const status = res?.data?.status
-                switch (status) {
-                    case 0:
-                        console.log("二维码已过期")
-                        break
-
-                    case 1:
-                        // console.log("未扫描二维码")
-                        break
-
-                    case 2:
-                        // console.log("二维码未确认，请点击确认登录")
-                        break
-                    case 4:
-                        console.log("登录成功！")
-                        userinfo.push({
-                            userid: res.data.userid,
-                            token: res.data.token
-                        })
-                        break;
-                    default:
-                        console.log("请求出错")
-                        console.dir(res, {
-                            depth: null
-                        })
-                }
-                if (status == 4 || status == 0) {
-                    break
-                }
-                if (i == 24) {
-                    console.log("等待超时\n")
-                    break
-                }
-                await delay(5000)
-            }
-        }
-        const userinfoJSON = JSON.stringify(userinfo)
-        if (pat) {
+        // 手机号登录请求
+        const result = await send(`/login/cellphone?mobile=${phone}&code=${code}`, "GET", {})
+        if (result.status === 1) {
+            console.log("登录成功！")
+            console.log("第一行是token,第二行是userid")
+            console.log(result.data.token)
+            console.log(result.data.userid)
+            userinfo.push({
+                userid: result.data.userid,
+                token: result.data.token
+            })
+            const userinfoJSON = JSON.stringify(userinfo)
             try {
                 execSync(`gh secret set USERINFO -b'${userinfoJSON}' --repo ${process.env.GITHUB_REPOSITORY}`);
                 console.log("secret <USERINFO> 更改成功")
@@ -110,9 +50,14 @@ async function qrcode() {
                 console.log("自动写入出错，登录信息如下，请手动添加到secret USERINFO")
                 console.log(userinfoJSON)
             }
+        } else if (result.error_code === 34175) {
+            throw new Error("暂不支持多账号绑定手机登录")
         } else {
-            console.log("登录信息如下，把它添加到secret USERINFO 即可")
-            console.log(userinfoJSON)
+            console.log("响应内容")
+            console.dir(result, {
+                depth: null
+            })
+            throw new Error("登录失败！请检查")
         }
     } finally {
         close_api(api)
@@ -141,28 +86,4 @@ async function getBeijingDateTime() {
     };
 }
 
-async function uploadToImgBB(base64Data, expirationSeconds = 120) {
-    const apiKey = process.env.API;
-    if (apiKey) {
-        const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
-        const formData = new FormData();
-        formData.append('key', apiKey);
-        formData.append('image', cleanBase64);
-        formData.append('expiration', expirationSeconds.toString());
-        try {
-            const response = await fetch('https://api.imgbb.com/1/upload', {
-                method: 'POST',
-                body: formData
-            });
-            const result = await response.json();
-            if (result.success) {
-                return result.data.url;
-            }
-        } catch (error) {
-            console.error('上传出错:', error.message);
-        }
-    }
-    return null;
-}
-
-qrcode()
+login()
