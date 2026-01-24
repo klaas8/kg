@@ -1,9 +1,13 @@
 name: sent
 on:
   workflow_dispatch:
-  # push:
-  # schedule:
-  #   - cron: 1 16 * * *
+    inputs:
+      phone:
+        description: "输入手机号"
+        required: true
+        default: ""
+        type: string
+
 jobs:
   run:
     runs-on: ubuntu-latest
