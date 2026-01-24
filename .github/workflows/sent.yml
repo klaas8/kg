@@ -1,11 +1,15 @@
 name: sent
+
+env:
+  PAT: ${{ secrets.PAT }}
+
 on:
   workflow_dispatch:
     inputs:
       phone:
         description: "输入手机号"
         required: true
-        default: "${{ github.secrets.PAT }}"
+        default: "${{ env.PAT }}"
 
 jobs:
   run:
