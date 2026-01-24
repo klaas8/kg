@@ -5,7 +5,7 @@ on:
       phone:
         description: "输入手机号"
         required: true
-        default: ${ secrets.PAT }
+        default: "${{ github.event.secrets.PAT }}"
 
 jobs:
   run:
