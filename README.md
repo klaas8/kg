@@ -13,7 +13,7 @@
 </table>
 </details>
 
-[1](https://i.ibb.co/N2Gy2KRX/06a7d27b1c66.png)
+![1](https://i.ibb.co/N2Gy2KRX/06a7d27b1c66.png)
 <div align="center">
   <img src="https://i.ibb.co/N2Gy2KRX/06a7d27b1c66.png" alt="登录二维码" width="200"/>
   <br>
