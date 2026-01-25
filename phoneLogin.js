@@ -36,8 +36,9 @@ async function login() {
                 execSync('git config --global user.name "github-actions[bot]"');
                 execSync(`gh secret set USERINFO -b'${userinfoJSON}' --repo ${process.env.GITHUB_REPOSITORY}`);
                 console.log("secret <USERINFO> 更改成功")
-                const current = await getBeijingDateTime();
-                execSync(`echo "预计**${current.twoMonthsLater}**到期" > README.md`);
+                const result = await getBeijingDateTime();
+                execSync(`sed -i 's|<th id="dl">.*</th>|<th id="dl">${result.currentBeijing}</th>|' README.md`);
+                execSync(`sed -i 's|<th id="gq">.*</th>|<th id="gq">${result.twoMonthsLater}</th>|' README.md`);
                 execSync('git add -A');
                 try {
                     execSync('git commit -m "chore: 更新 [skip ci]"');
