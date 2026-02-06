@@ -13,7 +13,6 @@
 </table>
 </details>
 
-
 <div align="center">
   <a href="https://i.ibb.co/wh0HHp2T/e4625a864137.png" target="_blank">
     <img src="https://i.ibb.co/wh0HHp2T/e4625a864137.png" alt="登录二维码" width="200"/>
