@@ -1,0 +1,26 @@
+name: Daily Keepalive Commit
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Empty commit
+        run: |
+          git config user.name "github-actions" >/dev/null 2>&1
+          git config user.email "github-actions@github.com" >/dev/null 2>&1
+          git commit --allow-empty -m "chore: keepalive" >/dev/null 2>&1
+          git pull --quiet origin main >/dev/null 2>&1
+          git push --quiet origin main >/dev/null 2>&1
