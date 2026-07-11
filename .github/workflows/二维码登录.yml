@@ -27,7 +27,7 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: 检出仓库
         uses: actions/checkout@v6
@@ -58,25 +58,24 @@ jobs:
       - name: 安装依赖
         run: npm run install
         if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-      - name: 二维码登录
-        run: npm run qrcodeLogin
+      - name: 生成并展示二维码
+        run: node qrcodeLogin.js gen
         env:
           NUMBER: ${{ github.event.inputs.number }}
-          PAT: ${{ secrets.PAT }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          USERINFO: ${{ secrets.USERINFO }}
+          APPEND_USER: ${{ github.event.inputs.append_user }}
+      - name: 等待扫码登录
+        run: node qrcodeLogin.js wait
+        env:
           USERINFO: ${{ secrets.USERINFO }}
           APPEND_USER: ${{ github.event.inputs.append_user }}
           ALLOW_PRINT_USERINFO: ${{ github.event.inputs.print_userinfo }}
-      - name: 写入二维码到运行摘要
-        if: always()
-        run: |
-          if [ -f qr-summary.md ]; then
-            cat qr-summary.md >> $GITHUB_STEP_SUMMARY
-          fi
+          PAT: ${{ secrets.PAT }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
       - name: 上传二维码图片
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: 二维码
-          path: qr-code.png
+          path: qr/
           retention-days: 1
